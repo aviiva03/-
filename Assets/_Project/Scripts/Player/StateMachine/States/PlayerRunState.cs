@@ -2,9 +2,18 @@ using UnityEngine;
 
 public class PlayerRunState : PlayerState {
 
-    public PlayerRunState(PlayerController c, PlayerStateMachine m, PlayerStateFactory f) : base(c, m, f) { }
+    public PlayerRunState(PlayerController c, PlayerStateMachine m, PlayerStateFactory f)
+        : base(c, m, f) { }
 
     public override void Update() {
+        if (Controller.WantsLightAttack) {
+            StateMachine.ChangeState(Factory.LightAttack);
+            return;
+        }
+        if (Controller.WantsHeavyAttack) {
+            StateMachine.ChangeState(Factory.HeavyAttack);
+            return;
+        }
         if (Controller.WantsToDodge) {
             StateMachine.ChangeState(Factory.Dodge);
             return;
@@ -22,8 +31,9 @@ public class PlayerRunState : PlayerState {
             return;
         }
 
+        // Спринт: тратим стамину только здесь
         if (Controller.WantsToSprint) {
-            Controller.CosumeStamina(Stats.StaminaDrainPerSec * Time.deltaTime);
+            Controller.ConsumeStamina(Stats.StaminaDrainPerSec * Time.deltaTime);
         }
 
         Controller.ApplyMovement();

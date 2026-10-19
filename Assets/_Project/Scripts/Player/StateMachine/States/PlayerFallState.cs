@@ -1,6 +1,7 @@
 public class PlayerFallState : PlayerState {
 
-    public PlayerFallState(PlayerController c, PlayerStateMachine m, PlayerStateFactory f) : base(c, m, f) { }
+    public PlayerFallState(PlayerController c, PlayerStateMachine m, PlayerStateFactory f)
+        : base(c, m, f) { }
 
     public override void Update() {
         Controller.ApplyMovement();
@@ -11,7 +12,8 @@ public class PlayerFallState : PlayerState {
             return;
         }
 
-        if (Controller.WantsToDodge)
+        if (Controller.WantsToDodge) {
             StateMachine.ChangeState(Factory.Dodge);
+        }
     }
 }

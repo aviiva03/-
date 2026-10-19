@@ -6,6 +6,8 @@ public class PlayerStateFactory {
     public PlayerFallState Fall { get; }
     public PlayerDodgeState Dodge { get; }
     public PlayerLandState Land { get; }
+    public PlayerLightAttackState LightAttack { get; }
+    public PlayerHeavyAttackState HeavyAttack { get; }
 
     public PlayerStateFactory(PlayerController controller, PlayerStateMachine machine) {
         Idle = new PlayerIdleState(controller, machine, this);
@@ -14,5 +16,7 @@ public class PlayerStateFactory {
         Fall = new PlayerFallState(controller, machine, this);
         Dodge = new PlayerDodgeState(controller, machine, this);
         Land = new PlayerLandState(controller, machine, this);
+        LightAttack = new PlayerLightAttackState(controller, machine, this);
+        HeavyAttack = new PlayerHeavyAttackState(controller, machine, this);
     }
 }

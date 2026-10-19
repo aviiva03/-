@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class PlayerIdleState : PlayerState {
 
-    public PlayerIdleState(PlayerController c, PlayerStateMachine m, PlayerStateFactory f) : base(c, m, f) { }
+    public PlayerIdleState(PlayerController c, PlayerStateMachine m, PlayerStateFactory f)
+        : base(c, m, f) { }
 
     public override void Enter() {
         Controller.MoveDirection = Vector3.zero;
@@ -11,19 +12,27 @@ public class PlayerIdleState : PlayerState {
     }
 
     public override void Update() {
-        if (Controller.WantsToDodge){
+        if (Controller.WantsLightAttack) {
+            StateMachine.ChangeState(Factory.LightAttack);
+            return;
+        }
+        if (Controller.WantsHeavyAttack) {
+            StateMachine.ChangeState(Factory.HeavyAttack);
+            return;
+        }
+        if (Controller.WantsToDodge) {
             StateMachine.ChangeState(Factory.Dodge);
             return;
         }
-        if (Controller.WantsToJump){
+        if (Controller.WantsToJump) {
             StateMachine.ChangeState(Factory.Jump);
             return;
         }
-        if (!Controller.IsGrounded){
+        if (!Controller.IsGrounded) {
             StateMachine.ChangeState(Factory.Fall);
             return;
         }
-        if (Controller.HasMoveInput){
+        if (Controller.HasMoveInput) {
             StateMachine.ChangeState(Factory.Run);
             return;
         }
