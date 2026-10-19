@@ -11,13 +11,21 @@ public class PlayerIdleState : PlayerState {
     }
 
     public override void Update() {
-        if (Controller.WantsToDodge)
+        if (Controller.WantsToDodge){
             StateMachine.ChangeState(Factory.Dodge);
-        else if (Controller.WantsToJump)
+            return;
+        }
+        if (Controller.WantsToJump){
             StateMachine.ChangeState(Factory.Jump);
-        else if (!Controller.IsGrounded)
+            return;
+        }
+        if (!Controller.IsGrounded){
             StateMachine.ChangeState(Factory.Fall);
-        else if (Controller.HasMoveInput)
+            return;
+        }
+        if (Controller.HasMoveInput){
             StateMachine.ChangeState(Factory.Run);
+            return;
+        }
     }
 }

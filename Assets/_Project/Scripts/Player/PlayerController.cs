@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,35 +12,40 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] private Transform _groundCheck;
     [SerializeField] private float _groundCheckRadius = 0.25f;
     [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private float _maxSlopeAngle = 45f;
+    [SerializeField] private float _slopeDownRayLength = 0.5f;
 
     public PlayerStats Stats => _stats;
     public PlayerCamera CameraRef => _camera;
     public CharacterController CharacterController { get; private set; }
     public PlayerAnimator Animator { get; private set; }
 
+    private PlayerControls _input;
     private Vector2 _moveInput;
     private bool _jumpPressedThisFrame;
     private bool _sprintHeld;
     private bool _dodgePressedThisFrame;
+    private bool _jumpReleased;
 
     public Vector2 MoveInput => _moveInput;
     public bool HasMoveInput => _moveInput.sqrMagnitude > 0.01f;
+    public bool IsGrounded { get; private set; }
 
     public bool WantsToJump => _jumpPressedThisFrame && _coyoteTimer > 0f;
     public bool WantsToDodge => _dodgePressedThisFrame && Time.time - _lastDodgeTime > _stats.DodgeCooldown && _stats.HasStamina(_stats.DodgeStaminaCost);
 
-    public bool WantsToSprint => _sprintHeld && HasMoveInput && _stats.HasStamina(1f);
+    public bool WantsToSprint => _sprintHeld && HasMoveInput && IsGrounded && _stats.HasStamina(1f);
 
     public Vector3 MoveDirection { get; set; }
     public float VerticalVelocity { get; private set; }
     public Vector3 DodgeDirection { get; private set; }
-    public bool IsGrounded { get; private set; }
+    public float LastFallVelocity { get; private set; }
 
     private float _coyoteTimer;
+    private float _coyoteLockTimer;
     private float _jumpBufferTimer;
-    private bool _jumpReleased;
-
     private float _lastDodgeTime = -999f;
+    private bool _wasGroundedLastFrame;
 
     private PlayerStateMachine _stateMachine;
     private PlayerStateFactory _factory;
@@ -57,7 +61,6 @@ public class PlayerController : MonoBehaviour {
         _stateMachine.Initialize(_factory.Idle);
     }
 
-    private PlayerControls _input;
     private void _inputSetup() {
         _input = new PlayerControls();
 
@@ -75,7 +78,6 @@ public class PlayerController : MonoBehaviour {
 
         _input.Player.Dodge.performed += ctx => _dodgePressedThisFrame = true;
     }
-
 
     private void OnEnable() => _input.Player.Enable();
     private void OnDisable() => _input.Player.Disable();
@@ -96,13 +98,77 @@ public class PlayerController : MonoBehaviour {
         _jumpReleased = false;
     }
 
+
+    private void UpdateGrounded() {
+        bool sphereHit = Physics.CheckSphere(_groundCheck.position, _groundCheckRadius, _groundLayer, QueryTriggerInteraction.Ignore);
+
+        if (sphereHit) {
+            IsGrounded = true;
+            _wasGroundedLastFrame = true;
+            return;
+        }
+
+        if (_wasGroundedLastFrame && VerticalVelocity <= 0f) {
+            if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out RaycastHit hit, _slopeDownRayLength, _groundLayer, QueryTriggerInteraction.Ignore)) {
+                float slopeAngle = Vector3.Angle(Vector3.up, hit.normal);
+                if (slopeAngle <= _maxSlopeAngle) {
+                    IsGrounded = true;
+                    CharacterController.Move(Vector3.down * 0.5f * Time.deltaTime);
+                    return;
+                }
+            }
+        }
+
+        IsGrounded = false;
+        _wasGroundedLastFrame = false;
+    }
+
+
+    private void UpdateCoyoteTimer() {
+        if (_coyoteLockTimer > 0f) {
+            _coyoteLockTimer -= Time.deltaTime;
+            _coyoteTimer = 0f;
+            return;
+        }
+
+        if (IsGrounded)
+            _coyoteTimer = _stats.CoyoteTime;
+        else
+            _coyoteTimer -= Time.deltaTime;
+    }
+
+    private void UpdateJumpBuffer() {
+        if (_jumpBufferTimer > 0f)
+            _jumpBufferTimer -= Time.deltaTime;
+    }
+
+    public void ResetCoyoteTimer() {
+        _coyoteTimer = 0f;
+        _coyoteLockTimer = 0.1f;
+    }
+
+    public void ResetJumpBuffer() => _jumpBufferTimer = 0f;
+
+
+    private void HandleGravity() {
+        if (IsGrounded && VerticalVelocity < 0f)
+            VerticalVelocity = -2f;
+
+        float multiplier = 1f;
+        if (VerticalVelocity < 0f)
+            multiplier = _stats.FallGravityMultiplier;
+        else if (_jumpReleased)
+            multiplier = _stats.LowJumpMultiplier;
+
+        VerticalVelocity += _stats.Gravity * multiplier * Time.deltaTime;
+        CharacterController.Move(Vector3.up * VerticalVelocity * Time.deltaTime);
+    }
+
+
     public void ApplyMovement() {
         Vector3 inputDir = GetCameraRelativeMoveDirection();
 
         float targetSpeed = WantsToSprint ? _stats.RunSpeed : _stats.WalkSpeed;
-        if (WantsToSprint) {
-            _stats.ConsumeStamina(_stats.StaminaDrainPerSec * Time.deltaTime);
-        }
 
         float currentSpeed = MoveDirection.magnitude;
         float desiredSpeed = inputDir.magnitude * targetSpeed;
@@ -119,7 +185,13 @@ public class PlayerController : MonoBehaviour {
         CharacterController.Move(MoveDirection * Time.deltaTime);
     }
 
+
     public void MoveCharacter(Vector3 delta) => CharacterController.Move(delta);
+    public void SetVerticalVelocity(float v) => VerticalVelocity = v;
+    public void SetDodgeDirection(Vector3 dir) => DodgeDirection = dir;
+    public void SetLastFallVelocity(float v) => LastFallVelocity = v;
+    public void MarkDodgeTime() => _lastDodgeTime = Time.time;
+    public void CosumeStamina(float amount) => _stats.ConsumeStamina(amount);
 
     public Vector3 GetCameraRelativeMoveDirection() {
         Vector3 f = _camera.PlanarForward;
@@ -127,51 +199,16 @@ public class PlayerController : MonoBehaviour {
         return f * _moveInput.y + r * _moveInput.x;
     }
 
-    public void SetVerticalVelocity(float v) => VerticalVelocity = v;
-    public void ResetCoyoteTimer() => _coyoteTimer = 0f;
-    public void MarkDodgeTime() => _lastDodgeTime = Time.time;
-    public void CosumeStamina(float amount) => _stats.ConsumeStamina(amount);
-    public void SetDodgeDirection(Vector3 dir) => DodgeDirection = dir;
-
-    private void UpdateGrounded() {
-        IsGrounded = Physics.CheckSphere(_groundCheck.position, _groundCheckRadius, _groundLayer, QueryTriggerInteraction.Ignore);
-    }
-
-    private void UpdateCoyoteTimer() {
-        if (IsGrounded)
-            _coyoteTimer = _stats.CoyoteTime;
-        else
-            _coyoteTimer -= Time.deltaTime;
-    }
-
-    private void UpdateJumpBuffer() {
-        if (_jumpBufferTimer > 0f)
-            _jumpBufferTimer -= Time.deltaTime;
-    }
-
-    private void HandleGravity() {
-        if (IsGrounded && VerticalVelocity < 0f)
-            VerticalVelocity = -2f;
-
-        float multiplier = 1f;
-        if (VerticalVelocity < 0f)
-            multiplier = _stats.FallGravityMultiplier;
-        else if (_jumpReleased)
-            multiplier = _stats.LowJumpMultiplier;
-
-        VerticalVelocity += _stats.Gravity * multiplier * Time.deltaTime;
-        CharacterController.Move(Vector3.up * VerticalVelocity * Time.deltaTime);
-    }
 
     private void UpdateAnimator() {
-        //float normalized = MoveDirection.magnitude / _stats.RunSpeed;
-        float targetSpeed = WantsToSprint ? Stats.RunSpeed : Stats.WalkSpeed;
-        float targetNormalized = HasMoveInput ? targetSpeed / Stats.RunSpeed : 0f;
+        float targetSpeed = WantsToSprint ? _stats.RunSpeed : _stats.WalkSpeed;
+        float normalized = HasMoveInput ? targetSpeed / _stats.RunSpeed : 0f;
 
-        Animator.SetSpeed(targetNormalized);
+        Animator.SetSpeed(normalized);
         Animator.SetGrounded(IsGrounded);
         Animator.SetVerticalVelocity(VerticalVelocity);
     }
+
 
     private void OnDrawGizmosSelected() {
         if (_groundCheck == null) return;

@@ -25,7 +25,13 @@ public class PlayerDodgeState : PlayerState {
 
         float t = _dodgeTimeLeft / Stats.DodgeDuration;
         float speed = Stats.DodgeSpeed * Mathf.SmoothStep(0f, 1f, t);
+
         Controller.MoveCharacter(Controller.DodgeDirection * speed * Time.deltaTime);
+
+        if (Controller.WantsToJump && Controller.IsGrounded) {
+            StateMachine.ChangeState(Factory.Jump);
+            return;
+        }
 
         if (_dodgeTimeLeft <= 0f) {
             if (Controller.IsGrounded)

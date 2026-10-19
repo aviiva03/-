@@ -22,7 +22,11 @@ MonoBehaviour:
   StaminaDrainPerSec: 15
   StaminaRegenPerSec: 20
   RegenDelay: 1
-  DodgeSpeed: 12
-  DodgeDuration: 0.3
-  DodgeCooldown: 0.8
+  DodgeSpeed: 15
+  DodgeDuration: 0.5
+  DodgeCooldown: 0.1
   DodgeStaminaCost: 25
+  CoyoteTime: 0.15
+  JumpBufferTime: 0.15
+  FallGravityMultiplier: 2
+  LowJumpMultiplier: 3
