@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40965658cb45aa9448dbe5890649cb3c, type: 3}
+  m_Name: EarthquakeAttack
+  m_EditorClassIdentifier: 
+  Type: 3
+  AttackName: Earthquake
+  Damage: 20
+  HitRadius: 1
+  HitForwardOffset: 1.5
+  Windup: 0.6
+  RepeatWindup: 0.3
+  ImpactTime: 0.15
+  RecoveryTime: 0.4
+  RepeatGap: 0.3
+  MinRepeats: 0
+  MaxRepeats: 2
+  AnimatorParamName: EarthquakePhase
+  EarthquakeMaxRadius: 8
+  EarthquakeMaxCharge: 4
+  EarthquakeChargeTime: 1.5
+  EarthquakeExplosionDelay: 0.3
+  EarthquakeExplosionCount: 6
+  JumpWindup: 0.5
+  JumpAirTime: 0.7
+  JumpRecovery: 0.6
+  JumpMaxRange: 10
+  RushWindup: 0.6
+  RushSpeed: 10
+  RushDuration: 0.3
+  ClapRadius: 3

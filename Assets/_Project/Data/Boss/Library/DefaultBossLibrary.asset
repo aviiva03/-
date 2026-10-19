@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f42c975f3fe7946bb3442dc0c1e8d0, type: 3}
+  m_Name: DefaultBossLibrary
+  m_EditorClassIdentifier: 
+  Phases:
+  - {fileID: 11400000, guid: 599505a52f09de244aa3e1da73ab3bf3, type: 2}
+  - {fileID: 11400000, guid: 41d563c103b957546a13aef7626d8380, type: 2}

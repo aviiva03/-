@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c469b18de3bed5149a34b3a1042b6da4, type: 3}
+  m_Name: Phase1
+  m_EditorClassIdentifier: 
+  PhaseName: Phase 1
+  SpeedMultiplier: 1
+  AggressionMultiplier: 1
+  Combos:
+  - {fileID: 11400000, guid: f1717962ded08244e9cd427ce59d63cc, type: 2}
+  - {fileID: 11400000, guid: c6271c636386e2d4eb686918a650655f, type: 2}

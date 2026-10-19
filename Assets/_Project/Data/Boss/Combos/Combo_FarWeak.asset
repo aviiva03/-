@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7ace0f8284d73442a4a792d8dd2f53d, type: 3}
+  m_Name: Combo_FarWeak
+  m_EditorClassIdentifier: 
+  ComboName: Far Weak
+  MinHealthPercent: 0.5
+  MaxHealthPercent: 1
+  MinDistance: 5
+  MaxDistance: 10
+  Attacks:
+  - {fileID: 11400000, guid: 9975103016d934f40a483be3f71431c8, type: 2}
+  - {fileID: 11400000, guid: 2d4daff21c2cff84da1a8f1a11087d70, type: 2}
